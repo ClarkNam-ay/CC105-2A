@@ -1,77 +1,64 @@
 <?php
-// 🔌 Connect to database
-$conn = new mysqli("localhost", "root", "", "your_database");
+session_start();
+require "include/db.php";
 
-// ❌ Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+$message = "";
+
+if (isset($_POST['login'])) {
+
+    $username = trim($_POST['username']);
+    $password = trim($_POST['password']);
+
+    if (empty($username) || empty($password)) {
+        $message = "Please fill up all fields!";
+    } else {
+
+        $stmt = $conn->prepare("SELECT * FROM users WHERE username=?");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+
+            $user = $result->fetch_assoc();
+
+            if (password_verify($password, $user['password'])) {
+
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $user['username'];
+
+                header("Location: dashboard.php");
+                exit();
+            } else {
+                $message = "Incorrect Password!";
+            }
+
+        } else {
+            $message = "User not found!";
+        }
+    }
 }
-
-// 📥 Fetch data (example table: books)
-$sql = "SELECT * FROM books ORDER BY id DESC";
-$result = $conn->query($sql);
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Home Page</title>
-    <style>
-        body {
-            font-family: Arial;
-            background: #f4f4f4;
-            padding: 20px;
-        }
-        h2 {
-            text-align: center;
-        }
-        table {
-            width: 80%;
-            margin: auto;
-            border-collapse: collapse;
-            background: #fff;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ccc;
-            text-align: center;
-        }
-        th {
-            background: #333;
-            color: #fff;
-        }
-    </style>
+    <title>Login</title>
 </head>
 <body>
 
-<h2>📚 Book List</h2>
+<h2>Login</h2>
 
-<table>
-    <tr>
-        <th>ID</th>
-        <th>Title</th>
-        <th>Author</th>
-    </tr>
+<p style="color:red;"><?php echo $message; ?></p>
 
-    <?php if ($result->num_rows > 0): ?>
-        <?php while($row = $result->fetch_assoc()): ?>
-            <tr>
-                <td><?= $row['id']; ?></td>
-                <td><?= $row['title']; ?></td>
-                <td><?= $row['author']; ?></td>
-            </tr>
-        <?php endwhile; ?>
-    <?php else: ?>
-        <tr>
-            <td colspan="3">No data found</td>
-        </tr>
-    <?php endif; ?>
+<form method="POST">
+    <input type="text" name="username" placeholder="Username"><br><br>
+    <input type="password" name="password" placeholder="Password"><br><br>
+    <button type="submit" name="login">Login</button>
+</form>
 
-</table>
+<br>
+<a href="register.php">Create Account</a>
 
 </body>
 </html>
-
-<?php
-$conn->close();
-?>
