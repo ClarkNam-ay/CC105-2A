@@ -1,21 +1,24 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Simple Form</title>
-</head>
-<body>
-
-<form method="POST">
-    Name: <input type="text" name="username">
-    <input type="submit" value="Submit">
-</form>
-
 <?php
+session_start();
+
+$valid_username = "admin";
+$valid_password = "1234";
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = $_POST['username'];
-    echo "Hello, " . htmlspecialchars($name);
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    if ($username == $valid_username && $password == $valid_password) {
+        $_SESSION['user'] = $username;
+        echo "Login successful! Welcome " . $username;
+    } else {
+        echo "Invalid username or password!";
+    }
 }
 ?>
 
-</body>
-</html>
+<form method="POST">
+    Username: <input type="text" name="username"><br>
+    Password: <input type="password" name="password"><br>
+    <input type="submit" value="Login">
+</form>
