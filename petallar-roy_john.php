@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?php
 session_start();
 require "include/db.php";
@@ -62,3 +63,6 @@ if (isset($_POST['login'])) {
 
 </body>
 </html>
+=======
+Done
+>>>>>>> a5036e09a28cbc69b7a0e8b15bfe115265b34fdc
